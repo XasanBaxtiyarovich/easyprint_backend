@@ -5,9 +5,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ServeStaticModule } from '@nestjs/serve-static';
 
 import { Role } from './role/entities';
+import { Users } from './users/entities';
 import { Image } from './images/entities';
 import { RoleModule } from './role/role.module';
 import { ImagesModule } from './images/images.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -27,13 +29,15 @@ import { ImagesModule } from './images/images.module';
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
-      entities: [ Role, Image ],
+      entities: [ Role, Image, Users ],
       synchronize: true,
     }),
 
     RoleModule,
 
     ImagesModule,
+
+    UsersModule
   ],
   controllers: [],
   providers: [],
