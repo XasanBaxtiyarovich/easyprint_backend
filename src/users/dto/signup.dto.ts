@@ -26,7 +26,6 @@ export class SignUpDto{
     @MaxLength(22)
     password: string;
 
-    @ApiProperty({ example: 1, description: 'Role primary key id'})
-    @IsNotEmpty()    
+    @ApiProperty({ example: 1, description: 'Role primary key id'}) 
     role: Role;
 }

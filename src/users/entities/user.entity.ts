@@ -24,6 +24,18 @@ export class Users {
   @Column({ type: 'text' })
   hashed_password: string;
 
+  @ApiProperty({ example: true, description: 'User active' })
+  @Column({ default: true })
+  is_active: boolean;
+
+  @ApiProperty({ example: 'cjkdm,ssfds', description: 'User avatar link' })
+  @Column({ type: 'text' })
+  image: string;
+
+  @ApiProperty({ example: 'cjkdm,ssfds', description: 'User token' })
+  @Column({ type: 'text', default: "" })
+  token: string;
+
   @ManyToOne(() => Role, (role) => role.users)
   role: Role;
 

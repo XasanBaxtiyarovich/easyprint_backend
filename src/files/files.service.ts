@@ -8,14 +8,16 @@ import * as uuid from "uuid"
 export class FilesService { 
     async createFile(fileName: any): Promise<string> {
         try {
-            const file = uuid.v4() + `.jpg`;
-            const filePath = path.resolve(__dirname, "..", "static")
+            if (fileName) {
+                const file = uuid.v4() + `.jpg`;
+                const filePath = path.resolve(__dirname, "..", "static")
 
-            if(!fs.existsSync(filePath)) fs.mkdirSync(filePath, { recursive: true })
+                if(!fs.existsSync(filePath)) fs.mkdirSync(filePath, { recursive: true })
 
-            fs.writeFileSync(path.join(filePath,file),fileName.buffer)
-            
-            return file;
+                fs.writeFileSync(path.join(filePath,file),fileName.buffer)
+                
+                return file;
+            }
         } catch (error) {
             throw new HttpException("Error creating file", HttpStatus.INTERNAL_SERVER_ERROR)
         }

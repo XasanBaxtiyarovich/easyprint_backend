@@ -6,6 +6,7 @@ import { Users } from './entities';
 import { Role } from 'src/role/entities';
 import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
+import { FilesModule } from 'src/files/files.module';
 
 
 @Module({
@@ -15,7 +16,8 @@ import { UsersController } from './users.controller';
         Users, Role
       ]
     ),
-    JwtModule.register({}),
+    FilesModule,
+    JwtModule.register({})
   ],
   controllers: [UsersController],
   providers: [UsersService],
