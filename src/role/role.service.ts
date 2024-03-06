@@ -16,7 +16,7 @@ export class RoleService {
 
     const new_role = await this.roleRepository.save({ ...createRoleDto });
 
-    return { status: HttpStatus.OK, role: new_role };
+    return { status: HttpStatus.CREATED, role: new_role };
   }
 
   async findAllRole(): Promise<Object> {
@@ -37,13 +37,21 @@ export class RoleService {
 
   async updateRole(id: number, updateRoleDto: UpdateRoleDto): Promise<Object> {
     const [ role ] = await this.roleRepository.findBy({ id });
+
     if (!role) return { status: HttpStatus.NOT_FOUND, message: 'Role not found' };
 
-    await this.roleRepository.update({ id }, { ...updateRoleDto });
+    const [ role_name ] =  await this.roleRepository.findBy({ name: updateRoleDto.name });
 
-    const updatedRole = await this.roleRepository.findBy({ id });
-
-    return { status: HttpStatus.OK, role: updatedRole };
+    if (role_name.id == id) {
+      
+      await this.roleRepository.update({ id }, { ...updateRoleDto });
+      
+      const updatedRole = await this.roleRepository.findBy({ id });
+      
+      return { status: HttpStatus.OK, role: updatedRole };
+    } else {
+      return { status: HttpStatus.CONFLICT, message: "Role already exists" };
+    }
   }
 
   async removeRole(id: number): Promise<Object | HttpStatus> {

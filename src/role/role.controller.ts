@@ -37,7 +37,7 @@ export class RoleController {
 
   @ApiOperation({ summary: "Update one role" })
   @ApiResponse({ status: HttpStatus.OK, type: Role })
-  @Put('update/:id')
+  @Post('update/:id')
   updateRole(
     @Param('id') id: number,
     @Body() updateRoleDto: UpdateRoleDto
