@@ -39,11 +39,17 @@ export class CompaniesService {
         
     if(!company) return { status: HttpStatus.NOT_FOUND, message: 'Company not found' }
 
-    await this.companyRepo.update({ id }, { ...updateCompanyDto });
+    const [ company_name ] = await this.companyRepo.findBy({ name: updateCompanyDto.name });
 
-    const updated_company = await this.companyRepo.findBy({ id });
-
-    return { status: HttpStatus.OK, updated_company };
+    if (company_name.id == id) {
+      await this.companyRepo.update({ id }, { ...updateCompanyDto });
+  
+      const updated_company = await this.companyRepo.findBy({ id });
+  
+      return { status: HttpStatus.OK, updated_company };
+    } else {
+      return { status: HttpStatus.CONFLICT, message: "Company name already exists" };
+    }
   }
 
   async remove(id: number): Promise<Object | HttpStatus> {
