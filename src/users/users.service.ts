@@ -2,7 +2,7 @@ import * as bcrypt from 'bcrypt'
 import { Repository } from 'typeorm';
 import { JwtService } from "@nestjs/jwt";
 import { InjectRepository } from '@nestjs/typeorm';
-import { BadRequestException, ExecutionContext, HttpStatus, Injectable, UnauthorizedException } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 
 import { Users } from './entities';
 import { FilesService } from 'src/files/files.service';

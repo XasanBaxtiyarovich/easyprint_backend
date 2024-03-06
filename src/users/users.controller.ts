@@ -1,10 +1,11 @@
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { Controller, Get, Post, Body, Param, Delete, UseInterceptors, UploadedFile, ExecutionContext } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, UseInterceptors, UploadedFile } from '@nestjs/common';
 
 import { Users } from './entities';
 import { UsersService } from './users.service';
 import { SignInDto, SignUpDto, UpdatePassDto, UpdateUserDto } from './dto';
+
 @ApiTags('Users')
 @Controller('users')
 export class UsersController {

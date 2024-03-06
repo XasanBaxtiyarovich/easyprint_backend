@@ -7,9 +7,11 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { Role } from './role/entities';
 import { Users } from './users/entities';
 import { Image } from './images/entities';
+import { Company } from './companies/entities';
 import { RoleModule } from './role/role.module';
-import { ImagesModule } from './images/images.module';
 import { UsersModule } from './users/users.module';
+import { ImagesModule } from './images/images.module';
+import { CompaniesModule } from './companies/companies.module';
 
 @Module({
   imports: [
@@ -29,7 +31,7 @@ import { UsersModule } from './users/users.module';
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
-      entities: [ Role, Image, Users ],
+      entities: [ Role, Image, Users, Company ],
       synchronize: true,
     }),
 
@@ -37,7 +39,9 @@ import { UsersModule } from './users/users.module';
 
     ImagesModule,
 
-    UsersModule
+    UsersModule,
+
+    CompaniesModule,
   ],
   controllers: [],
   providers: [],
