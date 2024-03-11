@@ -8,10 +8,14 @@ import { Role } from './role/entities';
 import { Users } from './users/entities';
 import { Image } from './images/entities';
 import { Company } from './companies/entities';
+import { Category } from './categories/entities';
+
 import { RoleModule } from './role/role.module';
 import { UsersModule } from './users/users.module';
 import { ImagesModule } from './images/images.module';
 import { CompaniesModule } from './companies/companies.module';
+import { CategoriesModule } from './categories/categories.module';
+
 
 @Module({
   imports: [
@@ -31,7 +35,7 @@ import { CompaniesModule } from './companies/companies.module';
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
-      entities: [ Role, Image, Users, Company ],
+      entities: [ Role, Image, Users, Company, Category ],
       synchronize: true,
     }),
 
@@ -42,6 +46,8 @@ import { CompaniesModule } from './companies/companies.module';
     UsersModule,
 
     CompaniesModule,
+
+    CategoriesModule,
   ],
   controllers: [],
   providers: [],

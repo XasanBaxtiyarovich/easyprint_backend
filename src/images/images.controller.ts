@@ -16,7 +16,7 @@ export class ImagesController {
   @Post('create')
   @UseInterceptors(FileInterceptor('image'))
   createImage(
-    @UploadedFile() image: any,
+    @UploadedFile() image: [],
     @Body() createImageDto: CreateImageDto
   ): Promise<Object> {
     return this.imagesService.createImage(createImageDto, image);
