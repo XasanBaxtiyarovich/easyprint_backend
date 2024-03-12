@@ -42,16 +42,14 @@ export class RoleService {
 
     const [ role_name ] =  await this.roleRepository.findBy({ name: updateRoleDto.name });
 
-    if (role_name.id == id) {
-      
-      await this.roleRepository.update({ id }, { ...updateRoleDto });
-      
-      const updatedRole = await this.roleRepository.findBy({ id });
-      
-      return { status: HttpStatus.OK, role: updatedRole };
-    } else {
+    if (role_name && role_name.id != id) 
       return { status: HttpStatus.CONFLICT, message: "Role already exists" };
-    }
+
+    await this.roleRepository.update({ id }, { ...updateRoleDto });
+    
+    const updatedRole = await this.roleRepository.findBy({ id });
+    
+    return { status: HttpStatus.OK, role: updatedRole };
   }
 
   async removeRole(id: number): Promise<Object | HttpStatus> {

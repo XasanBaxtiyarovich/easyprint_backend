@@ -21,7 +21,7 @@ export class CategoriesController {
 
   @ApiOperation({ summary: "Add pad category" })
   @ApiResponse({ status: 200, type: Category })
-  @Post('add-pad')
+  @Post('add-sub')
   add_pad_category(
       @Body() padCategoryAddDto: PadCategoryAddDto
   ): Promise<Object> {
@@ -51,6 +51,15 @@ export class CategoriesController {
       return this.categoriesService.findOne(id)
   }
 
+  @ApiOperation({ summary: "Find sub categories" })
+  @ApiResponse({ status: 200, type: [Category]})
+  @Get('find-parent/:id')
+  findSubCategories(
+      @Param('id') id: number
+  ): Promise<Object> {
+      return this.categoriesService.findSubCategories(id)
+  }
+
   @ApiOperation({ summary: "Update one category date" })
   @ApiResponse({ status: 200, type: Category })
   @Post('update/:id')
@@ -59,6 +68,16 @@ export class CategoriesController {
       @Body() updateCategoryDto: UpdateCategoryDto
   ): Promise<Object> {
       return this.categoriesService.update(id, updateCategoryDto)
+  }
+
+  @ApiOperation({ summary: "Update one pad category date" })
+  @ApiResponse({ status: 200, type: Category })
+  @Post('sub-update/:id')
+  updatePad(
+      @Param('id') id: number,
+      @Body() updateCategoryDto: UpdateCategoryDto
+  ): Promise<Object> {
+      return this.categoriesService.updatePad(id, updateCategoryDto)
   }
 
   @ApiOperation({ summary: "Remove one category" })
