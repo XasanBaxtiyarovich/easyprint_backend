@@ -20,7 +20,7 @@ export class Product {
     images: string[];
   
     @ApiProperty({ example: 0, description: 'Product status' })
-    @Column({ default: 0 })
+    @Column({ default: 1 })
     status: number;
   
     @ApiProperty({ example: 'Uzb', description: 'Product manufacturer country' })

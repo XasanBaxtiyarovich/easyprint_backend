@@ -25,7 +25,7 @@ export class ProductService {
       images.push(process.env.API_URL+file);
     }
 
-    const newProduct = await this.productRepository.save({ ...createProductDto, images });  
+    await this.productRepository.save({ ...createProductDto, images });  
     
     return HttpStatus.CREATED;
   }
