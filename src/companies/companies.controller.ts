@@ -1,9 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Controller, Get, Post, Body, Param, Delete } from '@nestjs/common';
 
+import { Company } from './entities';
 import { CompaniesService } from './companies.service';
 import { CreateCompanyDto, UpdateCompanyDto } from './dto'
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { Company } from './entities';
 
 @ApiTags('Company')
 @Controller('company')

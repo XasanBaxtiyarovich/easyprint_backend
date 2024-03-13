@@ -6,7 +6,6 @@ import { Product } from './entities';
 import { FilesService } from 'src/files/files.service';
 import { CreateProductDto, UpdateProductDto } from './dto';
 
-
 @Injectable()
 export class ProductService {
     constructor(

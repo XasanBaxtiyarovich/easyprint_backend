@@ -1,8 +1,9 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
-import { CreateCompanyDto, UpdateCompanyDto } from './dto'
-import { InjectRepository } from '@nestjs/typeorm';
-import { Company } from './entities';
 import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { HttpStatus, Injectable } from '@nestjs/common';
+
+import { Company } from './entities';
+import { CreateCompanyDto, UpdateCompanyDto } from './dto'
 
 @Injectable()
 export class CompaniesService {
