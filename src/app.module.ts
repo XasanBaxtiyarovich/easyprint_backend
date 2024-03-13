@@ -5,16 +5,18 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ServeStaticModule } from '@nestjs/serve-static';
 
 import { Role } from './role/entities';
+import { Size } from './size/entities';
 import { Users } from './users/entities';
+import { Color } from './color/entities';
 import { Image } from './images/entities';
 import { Product } from './product/entities';
 import { Company } from './companies/entities';
 import { Category } from './categories/entities';
-import { Size } from './size/entities/size.entity';
 
 import { RoleModule } from './role/role.module';
 import { SizeModule } from './size/size.module';
 import { UsersModule } from './users/users.module';
+import { ColorModule } from './color/color.module';
 import { ImagesModule } from './images/images.module';
 import { ProductModule } from './product/product.module';
 import { CompaniesModule } from './companies/companies.module';
@@ -39,7 +41,7 @@ import { CategoriesModule } from './categories/categories.module';
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
-      entities: [ Role, Image, Users, Company, Category, Product, Size ],
+      entities: [ Role, Image, Users, Company, Category, Product, Size, Color ],
       synchronize: true,
     }),
 
@@ -56,6 +58,8 @@ import { CategoriesModule } from './categories/categories.module';
     ProductModule,
 
     SizeModule,
+
+    ColorModule,
   ],
   controllers: [],
   providers: [],
