@@ -27,6 +27,10 @@ export class Cupon {
     @Column({ type: 'int' })
     min_price: number
 
+    @ApiProperty({ example: "12000", description: "Cupon min price" })
+    @Column({ default: true })
+    is_active: boolean
+
     @ApiProperty({ example: "1", description: "Cupon order count" })
     @Column({ type: 'int' })
     order_count: number

@@ -17,12 +17,10 @@ export class CreateCuponDto {
     name: string
 
     @ApiProperty({ example: "12000", description: "Cupon min price" })
-    @IsNumber()
     @IsNotEmpty()
     min_price: number
 
     @ApiProperty({ example: "1", description: "Cupon order count" })
-    @IsNumber()
     @IsNotEmpty()
     order_count: number
 
@@ -35,12 +33,10 @@ export class CreateCuponDto {
     end_date: string
 
     @ApiProperty({ example: "1", description: "Cupon type" })
-    @IsNumber()
     @IsNotEmpty()
     type: number
 
     @ApiProperty({ example: "0", description: "Cupon status" })
-    @IsNumber()
     @IsNotEmpty()
     status: number
 }
