@@ -12,7 +12,7 @@ export class ColorService {
   async create(createColorDto: CreateColorDto): Promise<Object> {
     const [conflict_color] = await this.colorRepository.findBy({ name: createColorDto.name, code: createColorDto.code });
 
-    if (conflict_color) return { status: HttpStatus.NOT_FOUND, message: "Color already exsist" };
+    if (conflict_color) return { status: HttpStatus.CONFLICT, message: "Color already exsist" };
 
     const color = await this.colorRepository.save({ ...createColorDto });
 
@@ -39,6 +39,11 @@ export class ColorService {
     const [color] = await this.colorRepository.findBy({ id });
 
     if (!color) return { status: HttpStatus.NOT_FOUND, message: 'Color not found' };
+
+    const [ color_conflict ] =  await this.colorRepository.findBy({ name: updateColorDto.name, code: updateColorDto.code });
+
+    if (color_conflict && color_conflict.id != id) 
+      return { status: HttpStatus.CONFLICT, message: "Color already exists" };
 
     await this.colorRepository.update({ id }, { ...updateColorDto });
 

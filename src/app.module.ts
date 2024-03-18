@@ -8,6 +8,7 @@ import { Role } from './role/entities';
 import { Size } from './size/entities';
 import { Users } from './users/entities';
 import { Color } from './color/entities';
+import { Cupon } from './cupons/entities';
 import { Image } from './images/entities';
 import { Product } from './product/entities';
 import { Company } from './companies/entities';
@@ -17,6 +18,7 @@ import { RoleModule } from './role/role.module';
 import { SizeModule } from './size/size.module';
 import { UsersModule } from './users/users.module';
 import { ColorModule } from './color/color.module';
+import { CuponsModule } from './cupons/cupons.module';
 import { ImagesModule } from './images/images.module';
 import { ProductModule } from './product/product.module';
 import { CompaniesModule } from './companies/companies.module';
@@ -41,7 +43,7 @@ import { CategoriesModule } from './categories/categories.module';
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
-      entities: [ Role, Image, Users, Company, Category, Product, Size, Color ],
+      entities: [ Role, Image, Users, Company, Category, Product, Size, Color, Cupon ],
       synchronize: true,
     }),
 
@@ -60,6 +62,8 @@ import { CategoriesModule } from './categories/categories.module';
     SizeModule,
 
     ColorModule,
+
+    CuponsModule,
   ],
   controllers: [],
   providers: [],
