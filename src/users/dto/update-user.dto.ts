@@ -13,5 +13,8 @@ export class UpdateUserDto{
     email?: string;
 
     @ApiProperty({ example: 1, description: 'Role primary key id'})  
-    role: Role;
+    role?: Role;
+
+    @ApiProperty({ example: 1, description: 'Company primary key id'}) 
+    company_id?: number;
 }

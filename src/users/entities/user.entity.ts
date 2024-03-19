@@ -37,6 +37,10 @@ export class Users {
   @Column({ type: 'text', default: "" })
   token: string;
 
+  @ApiProperty({ example: 2, description: 'Company primary key id'})
+  @Column({ type: 'int', default: null })
+  company_id: number
+
   @ManyToOne(() => Role, (role) => role.users)
   role: Role;
 

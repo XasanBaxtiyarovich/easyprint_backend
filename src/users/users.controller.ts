@@ -1,10 +1,11 @@
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { Controller, Get, Post, Body, Param, Delete, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, UseInterceptors, UploadedFile, UseGuards, Req } from '@nestjs/common';
 
 import { Users } from './entities';
 import { UsersService } from './users.service';
 import { SignInDto, SignUpDto, UpdatePassDto, UpdateUserDto } from './dto';
+import { UserGuard, AuthenticatedRequest } from 'src/guards/user-guard';
 
 @ApiTags('Users')
 @Controller('users')
@@ -45,6 +46,16 @@ export class UsersController {
       @Param('id') id: number
   ): Promise<Object> {
       return this.usersService.find_user(id)
+  }
+
+  @Get('find_by_token')
+  @UseGuards(UserGuard)
+  async findUserById(
+      @Req() req: AuthenticatedRequest // Используйте тип AuthenticatedRequest для req
+  ): Promise<Object> {
+      const user = req.user; // Получение объекта пользователя из запроса
+
+      return user;
   }
 
   @ApiOperation({ summary: "Update one user date" })

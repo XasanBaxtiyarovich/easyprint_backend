@@ -28,4 +28,7 @@ export class SignUpDto{
 
     @ApiProperty({ example: 1, description: 'Role primary key id'}) 
     role: Role;
+
+    @ApiProperty({ example: 1, description: 'Company primary key id'}) 
+    company_id: number;
 }

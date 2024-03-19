@@ -161,16 +161,24 @@ export class UsersService {
 }
 
 
-    async getToken(user: Users){
-      const jwtPayload={ id: user.id };
+async getToken(user: Users) {
+  const expiresInDate = new Date();
+  expiresInDate.setDate(expiresInDate.getDate() + 3);
 
-      const [accessToken] = await Promise.all([    
-          this.jwtService.signAsync(jwtPayload,{
-              secret: process.env.ACCES_TOKEN_KEY_PERSON,
-              expiresIn: process.env.ACCESS_TOKEN_TIME
-          })
-      ])
-      
-      return { token: accessToken };  
-    }
+  const jwtPayload = { id: user.id, role: user.role, expiresInDate };
+
+  try {
+      const accessToken = await this.jwtService.signAsync(jwtPayload, {
+          secret: process.env.ACCES_TOKEN_KEY_PERSON,
+          expiresIn: process.env.ACCESS_TOKEN_TIME || '1d', // Установка значения по умолчанию на один день, если переменная не установлена
+      });
+
+      return { token: accessToken };
+  } catch (error) {
+      // Обработка ошибок подписи токена
+      console.error('Ошибка при создании токена:', error);
+      throw new Error('Ошибка при создании токена');
+  }
+}
+
 }
