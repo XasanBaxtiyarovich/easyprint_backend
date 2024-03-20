@@ -77,6 +77,10 @@ export class UsersService {
         
         if (image != undefined && image != null) {
           const file = await this.fileService.createFile(image);
+
+          const status = await this.fileService.removeFile(user.image.split('/')[3])
+
+          if (status == 500) return HttpStatus.INTERNAL_SERVER_ERROR;
           
           await this.userRepository.update({ id }, { ...updateUserDto, image: process.env.API_URL+file  });
         } else {

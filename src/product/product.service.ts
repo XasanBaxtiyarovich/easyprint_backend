@@ -49,9 +49,15 @@ export class ProductService {
     const [ product ] = await this.productRepository.findBy({ id });
 
     if (!product) return { status: HttpStatus.NOT_FOUND, message: "Product not found" };
-
+    
     if (files.length > 0) {
       const images = [];
+      
+      for (let i = 0; i < product.images.length; i++) {
+        const status = await this.fileService.removeFile(product.images[i].split('/')[3]);
+  
+        if (status == 500) return HttpStatus.INTERNAL_SERVER_ERROR;
+      }
 
       for (let i = 0; i < files.length; i++) {
         const image = files[i];

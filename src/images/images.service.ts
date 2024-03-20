@@ -46,11 +46,13 @@ export class ImagesService {
 
     const file = await this.fileService.createFile(image);
 
+    const status = await this.fileService.removeFile(update_image.name.split('/')[3])
+
+    if (status == 500) return HttpStatus.INTERNAL_SERVER_ERROR;
+
     await this.imageRepository.update({ id }, {...updateImageDto, name: process.env.API_URL+file });
 
-    const [ updated_image ] = await this.imageRepository.findBy({ id });
-
-    return { status: HttpStatus.OK, image: updated_image };
+    return { status: HttpStatus.OK };
   }
 
   async removeImage(id: number): Promise<Object> {
