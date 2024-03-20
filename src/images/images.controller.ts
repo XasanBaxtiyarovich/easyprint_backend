@@ -1,6 +1,6 @@
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { Controller, Get, Post, Body, Param, Delete, HttpStatus, UseInterceptors, UploadedFile, Put } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, HttpStatus, UseInterceptors, UploadedFile } from '@nestjs/common';
 
 import { Image } from './entities';
 import { ImagesService } from './images.service';
@@ -41,7 +41,7 @@ export class ImagesController {
 
   @ApiOperation({ summary: 'Create image' })
   @ApiResponse({ status: HttpStatus.OK, type: Image })
-  @Put('update/:id')
+  @Post('update/:id')
   @UseInterceptors(FileInterceptor('image'))
   updateImage(
     @Param('id') id: number,

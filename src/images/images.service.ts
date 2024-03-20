@@ -18,9 +18,9 @@ export class ImagesService {
   async createImage(createImageDto: CreateImageDto, image: any): Promise<Object> {
     const file = await this.fileService.createFile(image);
 
-    const newImage = await this.imageRepository.save({ ...createImageDto, name: process.env.API_URL+file });
+    await this.imageRepository.save({ ...createImageDto, name: process.env.API_URL+file });
 
-    return { status: HttpStatus.CREATED, image: newImage };
+    return { status: HttpStatus.CREATED };
   }
 
   async findAllImages(): Promise<Object> {
@@ -41,16 +41,22 @@ export class ImagesService {
 
   async updateImage(id: number, updateImageDto: UpdateImageDto, image: any): Promise<Object> {
     const [ update_image ] = await this.imageRepository.findBy({ id });
-
+    
     if (!update_image) return { status: HttpStatus.NOT_FOUND, message: 'Image not found' };
 
-    const file = await this.fileService.createFile(image);
+    if (image) {
+      const file = await this.fileService.createFile(image);
 
-    const status = await this.fileService.removeFile(update_image.name.split('/')[3])
+      const status = await this.fileService.removeFile(update_image.name.split('/')[3])
 
-    if (status == 500) return HttpStatus.INTERNAL_SERVER_ERROR;
+      if (status == 500) return HttpStatus.INTERNAL_SERVER_ERROR;
 
-    await this.imageRepository.update({ id }, {...updateImageDto, name: process.env.API_URL+file });
+      await this.imageRepository.update({ id }, {...updateImageDto, name: process.env.API_URL+file });
+
+      return { status: HttpStatus.OK };
+    }
+
+    await this.imageRepository.update({ id }, {...updateImageDto });
 
     return { status: HttpStatus.OK };
   }
