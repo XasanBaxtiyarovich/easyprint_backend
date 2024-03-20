@@ -32,7 +32,7 @@ export class ProductService {
   async findAll(): Promise<Object> {
     const products = await this.productRepository.find();
 
-    if (!products) return { status: HttpStatus.NOT_FOUND, message: "Products not found" };
+    if (products.length === 0) return { status: HttpStatus.NOT_FOUND, message: "Products not found" };
 
     return { status: HttpStatus.OK, products };
   }
