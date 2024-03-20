@@ -22,4 +22,18 @@ export class FilesService {
             throw new HttpException("Error creating file", HttpStatus.INTERNAL_SERVER_ERROR)
         }
     }
+
+    async removeFile(fileName: string): Promise<HttpStatus> {
+        try {
+            const filePath = path.resolve(__dirname, '..', `static/${fileName}`)
+
+            fs.unlinkSync(path.join(filePath));
+
+            return HttpStatus.OK;
+        } catch (error) {
+            console.log(error);
+            
+            return HttpStatus.INTERNAL_SERVER_ERROR;
+        }
+    }
 }

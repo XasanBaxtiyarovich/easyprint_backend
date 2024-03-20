@@ -12,8 +12,8 @@ export class Image {
     name: string
 
     @ApiProperty({ example: null, description: "Image status, default null" })
-    @Column({ type: 'integer', default: null })
-    status: number | null;
+    @Column({ type: 'integer', default: 1 })
+    status: number;
 
     @CreateDateColumn()
     created_at: Date;

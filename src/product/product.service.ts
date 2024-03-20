@@ -78,6 +78,12 @@ export class ProductService {
 
     await this.productRepository.delete({ id });
 
+    for (let i = 0; i < product.images.length; i++) {
+      const status = await this.fileService.removeFile(product.images[i].split('/')[3]);
+
+      if (status == 500) return HttpStatus.INTERNAL_SERVER_ERROR;
+    }
+
     return HttpStatus.OK;
   }
 }

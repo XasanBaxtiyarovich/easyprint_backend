@@ -32,10 +32,7 @@ export class UsersService {
 
         await this.userRepository.update({ id: userNew.id }, { token })
 
-        const new_user = await this.userRepository.findOne({ where: { email: signUpDto.email }, relations: { role: true }});
-        
-
-        return { status: HttpStatus.CREATED, user: new_user, token };
+        return { status: HttpStatus.CREATED };
     }
 
     async user_signin(signInDto: SignInDto): Promise<Object> {
@@ -113,9 +110,14 @@ export class UsersService {
 
     async remove_user(id: number): Promise<Object | HttpStatus> {
         const [ user ] = await this.userRepository.findBy({ id });
+
         if(!user) return { status: HttpStatus.NOT_FOUND, message: 'User not found' }
       
         await this.userRepository.delete({ id });
+
+        const status = await this.fileService.removeFile(user.image.split('/')[3]);
+
+        if (status == 500) return HttpStatus.INTERNAL_SERVER_ERROR;
 
         return HttpStatus.OK;
     }

@@ -1,3 +1,5 @@
+import fs from 'fs';
+
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { HttpStatus, Injectable } from '@nestjs/common';
@@ -58,6 +60,10 @@ export class ImagesService {
 
     await this.imageRepository.delete({ id });
 
+    const status = await this.fileService.removeFile(image.name.split('/')[3])
+
+    if (status == 500) return HttpStatus.INTERNAL_SERVER_ERROR;
+    
     return HttpStatus.OK;
   }
 }
