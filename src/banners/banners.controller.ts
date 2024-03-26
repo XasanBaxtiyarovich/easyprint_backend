@@ -38,6 +38,18 @@ export class BannersController {
     return this.bannersService.findOne(+id);
   }
 
+  @ApiOperation({ summary: "Banner update" })
+  @ApiResponse({ status: 200, type: Banner })
+  @Post('update/:id')
+  @UseInterceptors(FilesInterceptor('images'))
+  async update(
+    @Param('id') id: number,
+    @UploadedFiles() images: [],
+    @Body() updateBannerDto: UpdateBannerDto
+  ): Promise<Object> {
+    return await this.bannersService.update(id, updateBannerDto, images);
+  }
+
   @ApiOperation({ summary: "Delete one banner" })
   @ApiResponse({ status: 200, type: Banner })
   @Delete('delete/:id')

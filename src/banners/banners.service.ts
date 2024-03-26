@@ -48,15 +48,56 @@ export class BannersService {
 
     if (banners.length === 0) return { status: HttpStatus.NOT_FOUND, message: "Banners not found" };
 
-    return { status: HttpStatus.OK, banners };
+    const parsedBanners = banners.map(banner => {
+      const images = banner.images.map(image => JSON.parse(image));
+      
+      return { ...banner, images };
+    });
+
+    return { status: HttpStatus.OK, parsedBanners };
   }
 
   async findOne(id: number): Promise<Object> {
-    const [ banner ] = await this.BannerRepository.findBy({ id });
+    const banners = await this.BannerRepository.findBy({ id });
 
-    if (!banner) return { status: HttpStatus.NOT_FOUND, message: "Banner not found" };
+    if (banners.length === 0) return { status: HttpStatus.NOT_FOUND, message: "Banner not found" };
 
-    return { status: HttpStatus.OK, banner };
+    const parsedBanners = banners.map(banner => {
+      const images = banner.images.map(image => JSON.parse(image));
+      
+      return { ...banner, images };
+    });
+
+    return { status: HttpStatus.OK, parsedBanners };
+  }
+
+  async update(id: number, updateBannerDto: UpdateBannerDto, images: []): Promise<Object> {
+    let count = 0;
+    const arr = [];
+    const img_arr = [];
+
+    for (let i = 0; i < images.length; i++) {
+      const image = images[i];
+
+      const file = await this.fileService.createFile(image);
+
+      if (count === 0) {
+        const banner = { banner: process.env.API_URL+file };
+
+        img_arr.push(banner);
+
+        count++;
+      } else {
+        arr.push(process.env.API_URL+file);
+      }
+    }
+    const carousel = { carousel: arr };
+
+    img_arr.push(carousel);
+    
+    await this.BannerRepository.update({ id }, {...updateBannerDto, images: img_arr});
+
+    return { status: HttpStatus.OK };
   }
 
   async remove(id: number): Promise<Object | Number> {

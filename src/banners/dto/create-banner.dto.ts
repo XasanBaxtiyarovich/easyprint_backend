@@ -12,6 +12,6 @@ export class CreateBannerDto {
     @IsNotEmpty()
     text: string;
 
-    @ApiProperty({ example: true, description: 'Product status' })
-    is_active: boolean;
+    @ApiProperty({ example: 0, description: 'Product status' })
+    is_active: number;
 }

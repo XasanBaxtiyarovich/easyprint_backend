@@ -25,6 +25,8 @@ import { BannersModule } from './banners/banners.module';
 import { ProductModule } from './product/product.module';
 import { CompaniesModule } from './companies/companies.module';
 import { CategoriesModule } from './categories/categories.module';
+import { DiscountModule } from './discount/discount.module';
+import { Discount } from './discount/entities/discount.entity';
 
 
 @Module({
@@ -45,7 +47,7 @@ import { CategoriesModule } from './categories/categories.module';
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
-      entities: [ Role, Image, Users, Company, Category, Product, Size, Color, Cupon, Banner ],
+      entities: [ Role, Image, Users, Company, Category, Product, Size, Color, Cupon, Banner, Discount ],
       synchronize: true,
     }),
 
@@ -68,6 +70,8 @@ import { CategoriesModule } from './categories/categories.module';
     CuponsModule,
 
     BannersModule,
+
+    DiscountModule,
   ],
   controllers: [],
   providers: [],

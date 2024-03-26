@@ -20,8 +20,8 @@ export class Banner {
     images: string[];
   
     @ApiProperty({ example: true, description: 'Product status' })
-    @Column({ default: true })
-    is_active: boolean;
+    @Column({ default: 0 })
+    is_active: number;
   
     @CreateDateColumn()
     created_at: Date;

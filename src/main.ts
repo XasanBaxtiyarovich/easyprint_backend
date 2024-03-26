@@ -17,7 +17,7 @@ const start = async() => {
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup("/api/docs", app, document);
-
+  
   app.enableCors();
   app.setGlobalPrefix('/api');
   app.useGlobalPipes(new ValidationPipe());
