@@ -3,9 +3,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { HttpStatus, Injectable } from '@nestjs/common';
 
 import { Product } from './entities';
+import { Category } from 'src/categories/entities';
 import { FilesService } from 'src/files/files.service';
 import { CreateProductDto, UpdateProductDto } from './dto';
-import { Category } from 'src/categories/entities';
 
 @Injectable()
 export class ProductService {
@@ -73,50 +73,54 @@ export class ProductService {
   }
 
   async update(id: number, updateProductDto: UpdateProductDto, files: []): Promise<HttpStatus | Object> {
-    const [ product ] = await this.productRepository.findBy({ id });
+    try {
+        const product = await this.productRepository.findOne({ where: { id }});
 
-    if (!product) return { status: HttpStatus.NOT_FOUND, message: "Product not found" };
-    
-    if (files.length > 0) {
-      const images = [];
-      
-      for (let i = 0; i < product.images.length; i++) {
-        const status = await this.fileService.removeFile(product.images[i].split('/')[3]);
-  
-        if (status == 500) return HttpStatus.INTERNAL_SERVER_ERROR;
-      }
+        if (!product) {
+            return { status: HttpStatus.NOT_FOUND, message: "Product not found" };
+        }
+        
+        if (files.length > 0) {
+            for (const image of product.images) {
+                const status = await this.fileService.removeFile(image.split('/')[3]);
+                if (status == 500) return HttpStatus.INTERNAL_SERVER_ERROR;
+            }
+            
+            const images = [];
+            for (const file of files) {
+                const image = await this.fileService.createFile(file);
+                images.push(process.env.API_URL + image);
+            }
+            
+            await this.productRepository.update({ id }, {...updateProductDto, images});
+        } else {
+            await this.productRepository.update({ id }, { ...updateProductDto });
+        }
 
-      for (let i = 0; i < files.length; i++) {
-        const image = files[i];
-  
-        const file = await this.fileService.createFile(image);
-  
-        images.push(process.env.API_URL+file);
-      }
-  
-      await this.productRepository.update({ id }, {...updateProductDto, images});
-
-      return HttpStatus.OK;
+        return HttpStatus.OK;
+    } catch (error) {
+        return { status: HttpStatus.INTERNAL_SERVER_ERROR, message: "Internal Server Error" };
     }
-    
-    await this.productRepository.update({ id }, {...updateProductDto});
-
-    return HttpStatus.OK;
   }
 
   async remove(id: number): Promise<HttpStatus | Object> {
-    const [ product ] = await this.productRepository.findBy({ id });
+    try {
+        const product = await this.productRepository.findOne({ where: {id} });
 
-    if (!product) return { status: HttpStatus.NOT_FOUND, message: "Product not found" };
+        if (!product) {
+            return { status: HttpStatus.NOT_FOUND, message: "Product not found" };
+        }
 
-    await this.productRepository.delete({ id });
+        await this.productRepository.delete({ id });
 
-    for (let i = 0; i < product.images.length; i++) {
-      const status = await this.fileService.removeFile(product.images[i].split('/')[3]);
+        for (const image of product.images) {
+            const status = await this.fileService.removeFile(image.split('/')[3]);
+            if (status == 500) return HttpStatus.INTERNAL_SERVER_ERROR;
+        }
 
-      if (status == 500) return HttpStatus.INTERNAL_SERVER_ERROR;
+        return HttpStatus.OK;
+    } catch (error) {
+        return { status: HttpStatus.INTERNAL_SERVER_ERROR, message: "Internal Server Error" };
     }
-
-    return HttpStatus.OK;
   }
 }
