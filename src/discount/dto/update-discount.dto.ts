@@ -1,21 +1,28 @@
 import { ApiProperty } from "@nestjs/swagger"
-import { IsNotEmpty, IsNumber, IsString } from "class-validator"
+import { IsNotEmpty } from "class-validator"
 
 export class UpdateDiscountDto {
     @ApiProperty({ example: "15%", description: "Discount parcent" })
-    @IsString()
     @IsNotEmpty()
     parcent: string
 
     @ApiProperty({ example: 1, description: "Product primary key id" })
-    @IsNumber()
-    @IsNotEmpty()
-    product_id: number
+    product_id: any
+
+    @ApiProperty({ example: 2, description: "Warehouse primary key id" })
+    warehouse_id: number
+
+    @ApiProperty({ example: 1, description: "Discount type" })
+    type: number
+
+    @ApiProperty({ example: "1", description: "Cupon company id" })
+    company_id: number
+
+    @ApiProperty({ example: "1", description: "Cupon category id" })
+    category_id: any
 
     @ApiProperty({ example: "1", description: "Cupon sub vategory id" })
-    @IsNumber()
-    @IsNotEmpty()
-    category_id: number
+    sub_category_id: number
 
     @ApiProperty({ example: "1", description: "Cupon start date" })
     @IsNotEmpty()

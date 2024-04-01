@@ -38,6 +38,24 @@ export class ProductController {
     return this.productService.findOne(+id);
   }
 
+  @ApiOperation({ summary: "Find by category id" })
+  @ApiResponse({ status: 200, type: [Product] })
+  @Get('findByCategoryId/:id')
+  findByCategoryId(
+    @Param('id') id: string
+  ): Promise<Object> {
+    return this.productService.findByCategoryId(+id);
+  }
+
+  @ApiOperation({ summary: "Find by category id" })
+  @ApiResponse({ status: 200, type: [Product] })
+  @Get('findByCategory/:id')
+  findByCategory(
+    @Param('id') id: string
+  ): Promise<Object> {
+    return this.productService.findByCategory(+id);
+  }
+
   @ApiOperation({ summary: "Update one product" })
   @ApiResponse({ status: 200, type: Product })
   @Post('update/:id')

@@ -5,11 +5,13 @@ import { HttpStatus, Injectable } from '@nestjs/common';
 import { Product } from './entities';
 import { FilesService } from 'src/files/files.service';
 import { CreateProductDto, UpdateProductDto } from './dto';
+import { Category } from 'src/categories/entities';
 
 @Injectable()
 export class ProductService {
     constructor(
       @InjectRepository(Product) private productRepository: Repository<Product>,
+      @InjectRepository(Category) private categoryRepository: Repository<Category>,
       private fileService: FilesService
     ) {}
 
@@ -43,6 +45,31 @@ export class ProductService {
     if (!product) return { status: HttpStatus.NOT_FOUND, message: "Product not found" };
 
     return { status: HttpStatus.OK, product };
+  }
+
+  async findByCategoryId(id: number): Promise<Object> {
+    const products = await this.productRepository.findBy({ category_id: id });
+
+    if (!products || products.length === 0) return { status: HttpStatus.NOT_FOUND, message: "Product not found" };
+
+    return { status: HttpStatus.OK, products };
+  }
+
+  async findByCategory(id: number): Promise<Object> {
+    const products = [];
+
+    const product = await this.productRepository.find();
+    const sub = await this.categoryRepository.find({ where: { parent_id: id, step: 1 }});
+
+    for (let i = 0; i < sub.length; i++) {
+      for (let j = 0; j < product.length; j++) {
+        if (sub[i].id == product[j].category_id) products.push(product[j])
+      }
+    }
+    
+    if (!products || products.length === 0) return { status: HttpStatus.NOT_FOUND, message: "Product not found" };
+
+    return { status: HttpStatus.OK, products };
   }
 
   async update(id: number, updateProductDto: UpdateProductDto, files: []): Promise<HttpStatus | Object> {

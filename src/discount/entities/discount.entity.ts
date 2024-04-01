@@ -12,8 +12,8 @@ export class Discount {
     parcent: string
 
     @ApiProperty({ example: 1, description: "Product primary key id" })
-    @Column({ type: 'int', default: null })
-    product_id: number
+    @Column({ type: 'jsonb', default: null })
+    product_id: any
 
     @ApiProperty({ example: 2, description: "Warehouse primary key id" })
     @Column({ type: 'int', default: null })
@@ -29,7 +29,7 @@ export class Discount {
 
     @ApiProperty({ example: "1", description: "Cupon company id" })
     @Column({ type: 'int', default: null })
-    category_id: number
+    category_id: any
 
     @ApiProperty({ example: 1, description: "Discount number" })
     @Column({ type: 'int', default: null })
