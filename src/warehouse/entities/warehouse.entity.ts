@@ -13,19 +13,19 @@ export class Warehouse {
 
     @ApiProperty({ example: 1, description: 'Warehouse company' })
     @Column({ type: 'int' ,default: null })
-    company_id: number ;
+    company_id: any;
 
     @ApiProperty({ example: 1, description: 'Warehouse product' })
     @Column({ type: 'int' ,default: null })
-    product_id: number;
+    product_id: any;
 
     @ApiProperty({ example: 1, description: 'Warehouse color' })
     @Column({ type: 'int' ,default: null })
-    color_id: number;
+    color_id: any;
 
     @ApiProperty({ example: 1, description: 'Warehouse size' })
     @Column({ type: 'int' ,default: null })
-    size_id: number;
+    size_id: any;
 
     @ApiProperty({ example: 12000, description: 'Warehouse quantity' })
     @Column({ type: 'int', default: null })

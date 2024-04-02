@@ -5,13 +5,21 @@ import { HttpStatus, Injectable } from '@nestjs/common';
 import { Warehouse } from './entities';
 import { FilesService } from 'src/files/files.service';
 import { CreateWarehouseDto, UpdateWarehouseDto } from './dto';
+import { Product } from 'src/product/entities';
+import { Size } from 'src/size/entities';
+import { Color } from 'src/color/entities';
+import { Category } from 'src/categories/entities';
 
 
 @Injectable()
 export class WarehouseService {
   constructor(
     private fileService: FilesService,
-    @InjectRepository(Warehouse) private warehouseRepository: Repository<Warehouse>
+    @InjectRepository(Warehouse) private warehouseRepository: Repository<Warehouse>,
+    @InjectRepository(Product) private productRepository: Repository<Product>,
+    @InjectRepository(Size) private sizeRepository: Repository<Size>,
+    @InjectRepository(Color) private colorRepository: Repository<Color>,    
+    @InjectRepository(Category) private categoryRepository: Repository<Category>,    
   ) {}
 
   async create(createWarehouseDto: CreateWarehouseDto, files: []): Promise<Object | Number> {
@@ -49,13 +57,45 @@ export class WarehouseService {
 
   async findOne(id: number): Promise<Object | Number> {
     try {
-        const warehouse = await this.warehouseRepository.findOne({ where: { id } });
+        const warehouses = await this.warehouseRepository.findBy({ id });
 
-        if (!warehouse) {
+        if (!warehouses) {
             return { status: HttpStatus.NOT_FOUND };
         }
 
-        return { status: HttpStatus.OK, warehouse };
+        for (let i = 0; i < warehouses.length; i++) {
+          warehouses[i].product_id = await this.productRepository.findOne({ where: { id: warehouses[i].product_id } })
+          warehouses[i].size_id = await this.sizeRepository.findOne({ where: { id: warehouses[i].size_id } })
+          warehouses[i].color_id = await this.colorRepository.findOne({ where: { id: warehouses[i].color_id } })
+          // warehouses[i].company_id = await this.productRepository.findOne({ where: { id: warehouses[i].company_id } })
+        }
+        
+        const category = await this.categoryRepository.findBy({ id: warehouses[0].product_id.category_id });
+
+        const warehouse = warehouses[0];
+
+        return { status: HttpStatus.OK, warehouse, category};
+    } catch (error) {
+        throw new Error("Error occurred while fetching warehouse: " + error.message);
+    }
+  }
+
+  async findByProduct(id: number): Promise<Object | Number> {
+    try {
+        const warehouses = await this.warehouseRepository.find({ where: { product_id: id } });
+
+        if (!warehouses) {
+            return { status: HttpStatus.NOT_FOUND };
+        }
+
+        for (let i = 0; i < warehouses.length; i++) {
+          warehouses[i].product_id = await this.productRepository.findOne({ where: { id: warehouses[i].product_id } })
+          warehouses[i].size_id = await this.sizeRepository.findOne({ where: { id: warehouses[i].size_id } })
+          warehouses[i].color_id = await this.colorRepository.findOne({ where: { id: warehouses[i].color_id } })
+          // warehouses[i].company_id = await this.productRepository.findOne({ where: { id: warehouses[i].company_id } })
+        }
+
+        return { status: HttpStatus.OK, warehouses };
     } catch (error) {
         throw new Error("Error occurred while fetching warehouse: " + error.message);
     }
@@ -70,6 +110,8 @@ export class WarehouseService {
         }
         
         if (files.length > 0) {
+          console.log(2);
+          
             for (const image of warehouse.images) {
                 const status = await this.fileService.removeFile(image.split('/')[3]);
                 if (status == 500) return HttpStatus.INTERNAL_SERVER_ERROR;
@@ -81,9 +123,17 @@ export class WarehouseService {
                 images.push(process.env.API_URL + image);
             }
             
-            await this.warehouseRepository.update({ id }, {...updateWarehouseDto, images});
+            try {
+              await this.warehouseRepository.update({ id }, {...updateWarehouseDto, images});
+            } catch (error) {
+              console.log(error);
+            }
         } else {
-            await this.warehouseRepository.update({ id }, { ...updateWarehouseDto });
+          try {
+            await this.warehouseRepository.update({ id }, {...updateWarehouseDto});
+          } catch (error) {
+            console.log(error);
+          }
         }
 
         return HttpStatus.OK;

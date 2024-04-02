@@ -38,6 +38,15 @@ export class WarehouseController {
     return this.warehouseService.findOne(+id);
   }
 
+  @ApiOperation({ summary: "Find one warehouse" })
+  @ApiResponse({ status: 200, type: Warehouse })
+  @Get('findByProduct/:id')
+  findByProduct(
+    @Param('id') id: string
+  ): Promise<Object> {
+    return this.warehouseService.findByProduct(+id);
+  }
+
   @ApiOperation({ summary: "Update one warehouse" })
   @ApiResponse({ status: 200, type: Warehouse })
   @Post('update/:id')

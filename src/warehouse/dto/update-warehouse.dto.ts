@@ -5,16 +5,16 @@ export class UpdateWarehouseDto {
     name: string;
 
     @ApiProperty({ example: 1, description: 'Warehouse company' })
-    company_id: number;
+    company_id: any;
 
     @ApiProperty({ example: 1, description: 'Warehouse product' })
-    product_id: number;
+    product_id: any;
 
     @ApiProperty({ example: 1, description: 'Warehouse color' })
-    color_id: number;
+    color_id: any;
 
     @ApiProperty({ example: 1, description: 'Warehouse size' })
-    size_id: number;
+    size_id: any;
 
     @ApiProperty({ example: 12000, description: 'Warehouse quantity' })
     quantity: number;

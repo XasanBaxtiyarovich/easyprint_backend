@@ -44,7 +44,9 @@ export class ProductService {
 
     if (!product) return { status: HttpStatus.NOT_FOUND, message: "Product not found" };
 
-    return { status: HttpStatus.OK, product };
+    const category = await this.categoryRepository.findOne({ where: { id: product.category_id}});
+
+    return { status: HttpStatus.OK, product, category };
   }
 
   async findByCategoryId(id: number): Promise<Object> {

@@ -58,7 +58,7 @@ export class CategoriesService {
   async findOne(id: number): Promise<Object> {
     const [ category ] = await this.categoryRepo.findBy({ id });
 
-    if(!category) return { status: HttpStatus.NOT_FOUND, message: 'Category not found' }
+    if(!category) return { status: HttpStatus.NOT_FOUND, message: 'Category not found' };
 
     return { status: HttpStatus.OK, category };
   }
