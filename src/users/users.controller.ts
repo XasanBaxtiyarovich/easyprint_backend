@@ -39,6 +39,15 @@ export class UsersController {
       return this.usersService.find_users()
   }
 
+  @ApiOperation({ summary: "Find all company users" })
+  @ApiResponse({ status: 200, type: [ Users ] })
+  @Get('findAll/company/:id')
+  findBy_company_users(
+    @Param('id') id: number
+  ): Promise<Object> {
+      return this.usersService.findBy_company_users(id)
+  }
+
   @ApiOperation({ summary: "Find one user" })
   @ApiResponse({ status: 200, type: Users})
   @Get('find/:id')

@@ -96,6 +96,14 @@ export class UsersService {
         return { status: HttpStatus.OK, users }
     }
 
+    async findBy_company_users(id: number): Promise<Object> {
+      const users = await this.userRepository.find({ where: { company_id: id }, relations: { role: true, personal_info: true }});
+
+      if(users.length === 0) return { status: HttpStatus.NOT_FOUND, message: 'Users not found' };
+      
+      return { status: HttpStatus.OK, users }
+    }
+
     async find_user(id: number): Promise<Object> {
         const user = await this.userRepository.findOne({ where: { id }, relations: { role: true, personal_info: true }});
 
