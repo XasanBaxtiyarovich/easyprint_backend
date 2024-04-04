@@ -4,7 +4,7 @@ import { HttpStatus, Injectable } from '@nestjs/common';
 
 import { Warehouse } from './entities';
 import { FilesService } from 'src/files/files.service';
-import { CreateWarehouseDto, UpdateWarehouseDto } from './dto';
+import { CreateWarehouseDto, GetWarehouseDto, UpdateWarehouseDto } from './dto';
 import { Product } from 'src/product/entities';
 import { Size } from 'src/size/entities';
 import { Color } from 'src/color/entities';
@@ -80,9 +80,9 @@ export class WarehouseService {
     }
   }
 
-  async findByProduct(id: number): Promise<Object | Number> {
+  async findByProduct(getWarehouseDto: GetWarehouseDto): Promise<Object | Number> {
     try {
-        const warehouses = await this.warehouseRepository.find({ where: { product_id: id } });
+        const warehouses = await this.warehouseRepository.find({ where: { product_id: getWarehouseDto.product_id, company_id: getWarehouseDto.company_id } });
 
         if (!warehouses) {
             return { status: HttpStatus.NOT_FOUND };

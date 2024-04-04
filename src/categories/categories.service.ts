@@ -51,6 +51,10 @@ export class CategoriesService {
     const categories = await this.categoryRepo.find({ where: {step: 1}});
 
     if(categories.length === 0) return { status: HttpStatus.NOT_FOUND, message: 'Categories not found' }
+
+    for (let i = 0; i < categories.length; i++) {
+      categories[i]['parent'] = await this.categoryRepo.findOne({ where: {id: categories[i].parent_id}})
+    }
     
     return { status: HttpStatus.OK, categories }
   }

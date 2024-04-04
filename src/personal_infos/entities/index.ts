@@ -1,0 +1,1 @@
+export * from './personal_info.entity';

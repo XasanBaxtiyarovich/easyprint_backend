@@ -4,7 +4,7 @@ import { Controller, Get, Post, Body, Param, Delete, UseInterceptors, UploadedFi
 
 import { Warehouse } from './entities';
 import { WarehouseService } from './warehouse.service';
-import { CreateWarehouseDto, UpdateWarehouseDto } from './dto';
+import { CreateWarehouseDto, UpdateWarehouseDto, GetWarehouseDto } from './dto';
 
 @ApiTags('Warehouse')
 @Controller('warehouse')
@@ -40,11 +40,11 @@ export class WarehouseController {
 
   @ApiOperation({ summary: "Find one warehouse" })
   @ApiResponse({ status: 200, type: Warehouse })
-  @Get('findByProduct/:id')
+  @Post('findByProduct')
   findByProduct(
-    @Param('id') id: string
+    @Body() getWarehouseDto: GetWarehouseDto
   ): Promise<Object> {
-    return this.warehouseService.findByProduct(+id);
+    return this.warehouseService.findByProduct(getWarehouseDto);
   }
 
   @ApiOperation({ summary: "Update one warehouse" })

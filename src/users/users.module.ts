@@ -7,13 +7,14 @@ import { Role } from 'src/role/entities';
 import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
 import { FilesModule } from 'src/files/files.module';
+import { PersonalInfo } from 'src/personal_infos/entities';
 
 
 @Module({
   imports: [
     TypeOrmModule.forFeature(
       [
-        Users, Role
+        Users, Role, PersonalInfo
       ]
     ),
     FilesModule,

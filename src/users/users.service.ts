@@ -6,41 +6,76 @@ import { HttpStatus, Injectable } from '@nestjs/common';
 
 import { Users } from './entities';
 import { FilesService } from 'src/files/files.service';
-import { SignInDto, SignUpDto, UpdatePassDto, UpdateUserDto } from './dto';
+import { PersonalInfo } from 'src/personal_infos/entities';
+import { SignInDto, CreateUser, UpdatePassDto, UpdateUserDto } from './dto';
 
 @Injectable()
 export class UsersService {
     constructor(
+      private jwtService: JwtService,
+      private fileService: FilesService,
         @InjectRepository(Users) private userRepository: Repository<Users>,
-        private jwtService: JwtService,
-        private fileService: FilesService
+        @InjectRepository(PersonalInfo) private personalInfoRepository: Repository<PersonalInfo>
     ) {}
 
-    async user_signup(signUpDto: SignUpDto, image: any): Promise<Object> {
+    async user_signup(createUser: CreateUser, image: any): Promise<Object> {
+      const [ user ] =  await this.userRepository.findBy({ email: createUser.email });
+
+      if(user) return { status: HttpStatus.CONFLICT, message: "Email already exists" } 
+
+      const file = await this.fileService.createFile(image);
       
-        const [ user ] =  await this.userRepository.findBy({ email: signUpDto.email });
-  
-        if(user) return { status: HttpStatus.CONFLICT, message: "Email already exists" } 
+      const password = await bcrypt.hash(createUser.password, 7);
 
-        const file = await this.fileService.createFile(image);
+      try {
+        const personalInfo = await this.personalInfoRepository.save({
+          first_name: createUser.first_name,
+          last_name: createUser.last_name,
+          middle_name: createUser.middle_name,
+          phone_number: createUser.phone_number,
+          avatar: process.env.API_URL+file,
+          gender: createUser.gender,
+          birth_date: createUser.birth_date,
+          email: createUser.email
+        })
 
-        const hashed_password = await bcrypt.hash(signUpDto.password, 7);
-
-        const userNew = await this.userRepository.save({ ...signUpDto, hashed_password, image: process.env.API_URL+file });  
+      if (createUser.company_id) {
+          const userNew = await this.userRepository.save({ 
+              email: createUser.email,
+              phone_number: createUser.phone_number,
+              password: password,
+              company_id: createUser.company_id,
+              role: createUser.role,
+              personal_info: personalInfo
+          });  
+          const { token } = await this.getToken(userNew);
+          
+          await this.userRepository.update({ id: userNew.id }, { token });
+      } else {
+          const userNew = await this.userRepository.save({ 
+              email: createUser.email,
+              phone_number: createUser.phone_number,
+              password: password,
+              role: createUser.role,
+              personal_info: personalInfo
+          });  
+          const { token } = await this.getToken(userNew);
       
-        const { token } = await this.getToken(userNew);
-
-        await this.userRepository.update({ id: userNew.id }, { token })
+          await this.userRepository.update({ id: userNew.id }, { token });
+      }
 
         return { status: HttpStatus.CREATED };
+      } catch (error) {
+        console.log(error);
+      }
     }
 
     async user_signin(signInDto: SignInDto): Promise<Object> {
-      const user = await this.userRepository.findOne({ where: { email: signInDto.email, is_active: true }, relations: { role: true }});
+      const user = await this.userRepository.findOne({ where: { email: signInDto.email }, relations: { role: true, personal_info: true }});
 
       if(!user) return { status: HttpStatus.NOT_FOUND, message: 'User not found' };
   
-      const pass = await bcrypt.compare(signInDto.password, user.hashed_password);
+      const pass = await bcrypt.compare(signInDto.password, user.password);
 
       if(!pass) return { status: HttpStatus.NOT_FOUND, message: 'User not found' };
   
@@ -48,48 +83,97 @@ export class UsersService {
 
       await this.userRepository.update({ id: user.id }, { token })
 
-      const update_user = await this.userRepository.findOne({ where: { email: user.email }, relations: { role: true }});
+      const update_user = await this.userRepository.findOne({ where: { email: user.email }, relations: { role: true, personal_info: true }});
 
       return { status: HttpStatus.OK, user: update_user, token };
-
     }
 
     async find_users(): Promise<Object> {
-        const users = await this.userRepository.find({ relations: { role: true }});
-        if(users.length === 0) return { status: HttpStatus.NOT_FOUND, message: 'Users not found' }
+        const users = await this.userRepository.find({ relations: { role: true, personal_info: true }});
+
+        if(users.length === 0) return { status: HttpStatus.NOT_FOUND, message: 'Users not found' };
         
         return { status: HttpStatus.OK, users }
     }
 
     async find_user(id: number): Promise<Object> {
-        const user = await this.userRepository.findOne({ where: { id }, relations: { role: true }});
+        const user = await this.userRepository.findOne({ where: { id }, relations: { role: true, personal_info: true }});
 
-        if(!user) return { status: HttpStatus.NOT_FOUND, message: 'User not found' }
+        if(!user) return { status: HttpStatus.NOT_FOUND, message: 'User not found' };
 
         return { status: HttpStatus.OK, user };
     }
 
-    async update_user_date(id: number, updateUserDto: UpdateUserDto, image: any): Promise<Object> {
-        const [ user ] = await this.userRepository.findBy({ id });
-        
-        if(!user) return { status: HttpStatus.NOT_FOUND, message: 'User not found' }
+    async update_user_data(id: number, updateUserDto: UpdateUserDto, image: any): Promise<Object> {
+      try {
+          const user = await this.userRepository.findOne({ where: { id }, relations: ['role', 'personal_info'] });
+  
+          if (!user) {
+              return { status: HttpStatus.NOT_FOUND, message: 'User not found' };
+          }
+  
+          if (image) {
+              const file = await this.fileService.createFile(image);
+              const personalInfo = await this.personalInfoRepository.findOne({ where: { id: user.personal_info.id } });
+  
+              if (!personalInfo) {
+                  return { status: HttpStatus.INTERNAL_SERVER_ERROR, message: 'Personal info not found' };
+              }
+  
+              const avatarFileName = personalInfo.avatar.split('/').pop();
+              const status = await this.fileService.removeFile(avatarFileName);
+  
+              if (status !== HttpStatus.OK) {
+                  return { status: HttpStatus.INTERNAL_SERVER_ERROR, message: 'Failed to remove old avatar' };
+              }
+  
+              await this.personalInfoRepository.update({ id: user.personal_info.id }, {
+                first_name: updateUserDto.first_name ? updateUserDto.first_name : personalInfo.first_name,
+                last_name: updateUserDto.last_name ? updateUserDto.last_name : personalInfo.last_name,
+                middle_name: updateUserDto.middle_name ? updateUserDto.middle_name : personalInfo.middle_name,
+                phone_number: updateUserDto.phone_number ? updateUserDto.phone_number : personalInfo.phone_number,
+                gender: updateUserDto.gender ? updateUserDto.gender : personalInfo.gender,
+                birth_date: updateUserDto.birth_date ? updateUserDto.birth_date : personalInfo.birth_date,
+                email: updateUserDto.email ? updateUserDto.email : personalInfo.email,
+                avatar: `${process.env.API_URL}${file}`,
+              });
+          } else {
+            const personalInfo = await this.personalInfoRepository.findOne({ where: { id: user.personal_info.id } });
 
-        
-        if (image != undefined && image != null) {
-          const file = await this.fileService.createFile(image);
-
-          const status = await this.fileService.removeFile(user.image.split('/')[3])
-
-          if (status == 500) return HttpStatus.INTERNAL_SERVER_ERROR;
-          
-          await this.userRepository.update({ id }, { ...updateUserDto, image: process.env.API_URL+file  });
-        } else {
-          await this.userRepository.update({ id }, { ...updateUserDto });
-        }
-
-        const updated_user = await this.userRepository.findOne({ where: { id }, relations: { role: true }});
-
-        return { status: HttpStatus.OK, updated_user };
+            await this.personalInfoRepository.update({ id: user.personal_info.id }, {
+              first_name: updateUserDto.first_name ? updateUserDto.first_name : personalInfo.first_name,
+              last_name: updateUserDto.last_name ? updateUserDto.last_name : personalInfo.last_name,
+              middle_name: updateUserDto.middle_name ? updateUserDto.middle_name : personalInfo.middle_name,
+              phone_number: updateUserDto.phone_number ? updateUserDto.phone_number : personalInfo.phone_number,
+              gender: updateUserDto.gender ? updateUserDto.gender : personalInfo.gender,
+              birth_date: updateUserDto.birth_date ? updateUserDto.birth_date : personalInfo.birth_date,
+              email: updateUserDto.email ? updateUserDto.email : personalInfo.email,
+            });
+          }
+  
+          if (updateUserDto.company_id) {
+            await this.userRepository.update({ id: user.id }, {
+              email: updateUserDto.email ? updateUserDto.email : user.email,
+              phone_number: updateUserDto.phone_number ? updateUserDto.phone_number : user.phone_number,
+              company_id: updateUserDto.company_id,
+              role: updateUserDto.role ? updateUserDto.role : user.role,
+            });
+          } else {
+            await this.userRepository.update({ id: user.id }, {
+              email: updateUserDto.email ? updateUserDto.email : user.email,
+              phone_number: updateUserDto.phone_number ? updateUserDto.phone_number : user.phone_number,
+              company_id: null,
+              role: updateUserDto.role ? updateUserDto.role : user.role,
+            });
+          }
+  
+          const updated_user = await this.userRepository.findOne({ where: { id }, relations: ['role', 'personal_info'] });
+  
+          return { status: HttpStatus.OK, updated_user };
+      } catch (error) {
+          console.error(error);
+          return { status: HttpStatus.INTERNAL_SERVER_ERROR, message: 'Internal server error' };
+      }
     }
 
     async update_user_pass(updatePassDto: UpdatePassDto, token: string): Promise<Object> {
@@ -97,94 +181,55 @@ export class UsersService {
 
         if (!user) return { status: HttpStatus.NOT_FOUND, message: 'User not found' };
     
-        const pass = await bcrypt.compare(updatePassDto.password, user.hashed_password);
+        const pass = await bcrypt.compare(updatePassDto.password, user.password);
         if (!pass) return { status: HttpStatus.UNAUTHORIZED, message: 'Wrong password' };
     
         if (updatePassDto.new_password != updatePassDto.confirm_password) 
             return { status: HttpStatus.UNAUTHORIZED, message: 'Confirm password error' };
     
-        const hashed_password = await bcrypt.hash(updatePassDto.new_password, 7);
+        const password = await bcrypt.hash(updatePassDto.new_password, 7);
     
-        await this.userRepository.update({ id: user.id }, { hashed_password });
+        await this.userRepository.update({ id: user.id }, { password });
     
-        const updatePasswordUser = await this.userRepository.findOne({ where: { id: user.id }, relations: { role: true }});
+        const updatePasswordUser = await this.userRepository.findOne({ where: { id: user.id }, relations: { role: true, personal_info: true }});
     
         return { status: HttpStatus.OK, updatePasswordUser };
     }
 
     async remove_user(id: number): Promise<Object | HttpStatus> {
-        const [ user ] = await this.userRepository.findBy({ id });
-
-        if(!user) return { status: HttpStatus.NOT_FOUND, message: 'User not found' }
+        const user = await this.userRepository.findOne({ where: { id }, relations: { personal_info: true }});
+        
+        if(!user) return { status: HttpStatus.NOT_FOUND, message: 'User not found' };
+        
+        const personalInfo = await this.personalInfoRepository.findOne({ where: { id: user.personal_info.id }});
       
-        await this.userRepository.delete({ id });
-
-        const status = await this.fileService.removeFile(user.image.split('/')[3]);
+        const status = await this.fileService.removeFile(personalInfo.avatar.split('/')[3])
 
         if (status == 500) return HttpStatus.INTERNAL_SERVER_ERROR;
+
+        await this.userRepository.delete({ id });
+
+        await this.personalInfoRepository.delete({ id: user.personal_info.id });
 
         return HttpStatus.OK;
     }
 
-    async active(token: string): Promise<Object | HttpStatus> {
-      const [ user ] = await this.userRepository.findBy({ token: token });
-  
-      if (!user) return { message: 'User Not Found', status: HttpStatus.NOT_FOUND };
-      
-      if (user.is_active) {
-        await this.userRepository.update({ id: user.id }, { is_active: false });
-        return {
-          message: 'User not activeted',
-          status: HttpStatus.OK
-        }
-      } else {
-        await this.userRepository.update({ id: user.id }, { is_active: true });
-        return {
-          message: 'User activeted',
-          status: HttpStatus.OK
-        }
-      }
-  }
+  async getToken(user: Users) {
+    const expiresInDate = new Date();
+    expiresInDate.setDate(expiresInDate.getDate() + 3);
 
-  async active_id(id: number): Promise<Object | HttpStatus> {
-    const [ user ] = await this.userRepository.findBy({ id });
+    const jwtPayload = { id: user.id, role: user.role, expiresInDate };
 
-    if (!user) return { message: 'User Not Found', status: HttpStatus.NOT_FOUND };
-    
-    if (user.is_active) {
-      await this.userRepository.update({ id: user.id }, { is_active: false });
-      return {
-        message: 'User not activeted',
-        status: HttpStatus.OK
-      }
-    } else {
-      await this.userRepository.update({ id: user.id }, { is_active: true });
-      return {
-        message: 'User activeted',
-        status: HttpStatus.OK
-      }
-    }
-}
-
-
-async getToken(user: Users) {
-  const expiresInDate = new Date();
-  expiresInDate.setDate(expiresInDate.getDate() + 3);
-
-  const jwtPayload = { id: user.id, role: user.role, expiresInDate };
-
-  try {
+    try {
       const accessToken = await this.jwtService.signAsync(jwtPayload, {
           secret: process.env.ACCES_TOKEN_KEY_PERSON,
-          expiresIn: process.env.ACCESS_TOKEN_TIME || '1d', // Установка значения по умолчанию на один день, если переменная не установлена
+          expiresIn: process.env.ACCESS_TOKEN_TIME || '1d',
       });
 
       return { token: accessToken };
-  } catch (error) {
-      // Обработка ошибок подписи токена
+    } catch (error) {
       console.error('Ошибка при создании токена:', error);
       throw new Error('Ошибка при создании токена');
+    }
   }
-}
-
 }
