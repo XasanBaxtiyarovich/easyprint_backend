@@ -14,99 +14,115 @@ export class BannersService {
   ) {}
 
   async create(createBannerDto: CreateBannerDto, images: []): Promise<HttpStatus> {
-    let count = 0;
-    const arr = [];
-    const img_arr = [];
-
-    for (let i = 0; i < images.length; i++) {
-      const image = images[i];
-
-      const file = await this.fileService.createFile(image);
-
-      if (count === 0) {
-        const banner = { banner: process.env.API_URL+file };
-
-        img_arr.push(banner);
-
-        count++;
-      } else {
-        arr.push(process.env.API_URL+file);
+    try {
+      const img_arr = [];
+      const carousel = { carousel: [] };
+  
+      for (let i = 0; i < images.length; i++) {
+          const file = await this.fileService.createFile(images[i]);
+          const imageUrl = process.env.API_URL + file;
+  
+          if (i === 0) {
+              img_arr.push({ banner: imageUrl });
+          } else {
+              carousel.carousel.push(imageUrl);
+          }
       }
+  
+      img_arr.push(carousel);
+  
+      await this.BannerRepository.save({...createBannerDto, images: img_arr });
+  
+      return HttpStatus.CREATED;
+    } catch (error) {
+        console.error('Error occurred while creating banner:', error);
+        return HttpStatus.INTERNAL_SERVER_ERROR;
     }
-    const carousel = { carousel: arr };
-
-    img_arr.push(carousel);
-
-
-    await this.BannerRepository.save({...createBannerDto, images: img_arr });
-
-    return HttpStatus.CREATED;
   }
 
   async findAll(): Promise<Object> {
-    const banners = await this.BannerRepository.find();
-
-    if (banners.length === 0) return { status: HttpStatus.NOT_FOUND, message: "Banners not found" };
-
-    const parsedBanners = banners.map(banner => {
-      const images = banner.images.map(image => JSON.parse(image));
-      
-      return { ...banner, images };
-    });
-
-    return { status: HttpStatus.OK, parsedBanners };
+    try {
+      const banners = await this.BannerRepository.find();
+  
+      if (banners.length === 0) {
+          return { status: HttpStatus.NOT_FOUND, message: "Banners not found" };
+      }
+  
+      const parsedBanners = banners.map(banner => {
+          const images = banner.images.map(image => JSON.parse(image));
+          return { ...banner, images };
+      });
+  
+      return { status: HttpStatus.OK, parsedBanners };
+    } catch (error) {
+        console.error('Error occurred while fetching banners:', error);
+        return { status: HttpStatus.INTERNAL_SERVER_ERROR, message: "Failed to fetch banners" };
+    }
   }
 
   async findOne(id: number): Promise<Object> {
-    const banners = await this.BannerRepository.findBy({ id });
-
-    if (banners.length === 0) return { status: HttpStatus.NOT_FOUND, message: "Banner not found" };
-
-    const parsedBanners = banners.map(banner => {
-      const images = banner.images.map(image => JSON.parse(image));
-      
-      return { ...banner, images };
-    });
-
-    return { status: HttpStatus.OK, parsedBanners };
+    try {
+      const banners = await this.BannerRepository.findBy({ id });
+  
+      if (banners.length === 0) {
+          return { status: HttpStatus.NOT_FOUND, message: "Banner not found" };
+      }
+  
+      const parsedBanners = banners.map(banner => {
+          const images = banner.images.map(image => JSON.parse(image));
+          return { ...banner, images };
+      });
+  
+      return { status: HttpStatus.OK, parsedBanners };
+    } catch (error) {
+        console.error('Error occurred while fetching banner:', error);
+        return { status: HttpStatus.INTERNAL_SERVER_ERROR, message: "Failed to fetch banner" };
+    }
   }
 
   async update(id: number, updateBannerDto: UpdateBannerDto, images: []): Promise<Object> {
-    let count = 0;
-    const arr = [];
-    const img_arr = [];
-
-    for (let i = 0; i < images.length; i++) {
-      const image = images[i];
-
-      const file = await this.fileService.createFile(image);
-
-      if (count === 0) {
-        const banner = { banner: process.env.API_URL+file };
-
-        img_arr.push(banner);
-
-        count++;
-      } else {
-        arr.push(process.env.API_URL+file);
+    try {
+      const img_arr = [];
+      const arr = [];
+      const carousel = { carousel: [] };
+  
+      for (let i = 0; i < images.length; i++) {
+          const file = await this.fileService.createFile(images[i]);
+          const imageUrl = process.env.API_URL + file;
+  
+          if (i === 0) {
+              img_arr.push({ banner: imageUrl });
+          } else {
+              arr.push(imageUrl);
+          }
       }
+  
+      carousel.carousel = arr;
+      img_arr.push(carousel);
+  
+      await this.BannerRepository.update({ id }, {...updateBannerDto, images: img_arr });
+  
+      return { status: HttpStatus.OK };
+    } catch (error) {
+        console.error('Error occurred while updating banner:', error);
+        return { status: HttpStatus.INTERNAL_SERVER_ERROR };
     }
-    const carousel = { carousel: arr };
-
-    img_arr.push(carousel);
-    
-    await this.BannerRepository.update({ id }, {...updateBannerDto, images: img_arr});
-
-    return { status: HttpStatus.OK };
   }
 
   async remove(id: number): Promise<Object | Number> {
-    const [ banner ] = await this.BannerRepository.findBy({ id });
-
-    if (!banner) return { status: HttpStatus.NOT_FOUND, message: "Banner not found" };
-
-    await this.BannerRepository.delete({id});
-
-    return HttpStatus.OK;
+    try {
+      const [banner] = await this.BannerRepository.findBy({ id });
+  
+      if (!banner) {
+          return { status: HttpStatus.NOT_FOUND, message: "Banner not found" };
+      }
+  
+      await this.BannerRepository.delete({ id });
+  
+      return { status: HttpStatus.OK };
+    } catch (error) {
+        console.error('Error occurred while deleting banner:', error);
+        return { status: HttpStatus.INTERNAL_SERVER_ERROR, message: "Failed to delete banner" };
+    }
   }
 }
