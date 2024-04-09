@@ -86,21 +86,32 @@ export class BannersService {
       const arr = [];
       const carousel = { carousel: [] };
   
-      for (let i = 0; i < images.length; i++) {
-          const file = await this.fileService.createFile(images[i]);
-          const imageUrl = process.env.API_URL + file;
+      // If there are new images, update them
+      if (images && images.length > 0) {
+          for (let i = 0; i < images.length; i++) {
+              const file = await this.fileService.createFile(images[i]);
+              const imageUrl = process.env.API_URL + file;
   
-          if (i === 0) {
-              img_arr.push({ banner: imageUrl });
-          } else {
-              arr.push(imageUrl);
+              if (i === 0) {
+                  img_arr.push({ banner: imageUrl });
+              } else {
+                  arr.push(imageUrl);
+              }
           }
+  
+          carousel.carousel = arr;
+          img_arr.push(carousel);
       }
   
-      carousel.carousel = arr;
-      img_arr.push(carousel);
+      // Get the existing banner data
+      const [ existingBanner ] = await this.BannerRepository.findBy({ id });
   
-      await this.BannerRepository.update({ id }, {...updateBannerDto, images: img_arr });
+      // If new images are provided, update the banner with new images,
+      // otherwise, retain the existing images
+      const updatedBannerData = images && images.length > 0 ? { ...existingBanner, ...updateBannerDto, images: img_arr } : { ...existingBanner, ...updateBannerDto };
+  
+      // Update the banner
+      await this.BannerRepository.update({ id }, updatedBannerData);
   
       return { status: HttpStatus.OK };
     } catch (error) {
